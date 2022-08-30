@@ -18,6 +18,7 @@ d_loss_arr = []
 g_loss_arr = []
 n_features = 128
 
+
 class DiscriminatorNet(torch.nn.Module):
     """
     the discriminator that contains 2 hidden layer
@@ -29,19 +30,19 @@ class DiscriminatorNet(torch.nn.Module):
         if sigmoid:
             self.hidden0 = nn.Sequential(nn.Linear(n_features, 256), nn.LeakyReLU(0.01))
             self.hidden1 = nn.Sequential(nn.Linear(256, 512), nn.LeakyReLU(0.01))
-            #self.hidden2 = nn.Sequential(nn.Linear(512, 512), nn.LeakyReLU(0.01))
+            # self.hidden2 = nn.Sequential(nn.Linear(512, 512), nn.LeakyReLU(0.01))
             self.out = nn.Sequential(torch.nn.Linear(512, 1), nn.Sigmoid())
 
         else:
             self.hidden0 = nn.Sequential(nn.Linear(n_features, 256), nn.LeakyReLU(0.01))
             self.hidden1 = nn.Sequential(nn.Linear(256, 512), nn.LeakyReLU(0.01))
-            #self.hidden2 = nn.Sequential(nn.Linear(512, 512), nn.LeakyReLU(0.1))
+            # self.hidden2 = nn.Sequential(nn.Linear(512, 512), nn.LeakyReLU(0.1))
             self.out = nn.Sequential(torch.nn.Linear(512, 1), torch.nn.Tanh())
 
     def forward(self, x):
         x = self.hidden0(x)
         x = self.hidden1(x)
-        #x = self.hidden2(x)
+        # x = self.hidden2(x)
         x = self.out(x)
         return x
 
@@ -59,7 +60,7 @@ class GeneratorNet(torch.nn.Module):
                 nn.Linear(n_features + z_dimention, 256), nn.LeakyReLU(0.01)
             )
             self.hidden1 = nn.Sequential(nn.Linear(256, 512), nn.LeakyReLU(0.01))
-            #self.hidden2 = nn.Sequential(nn.Linear(512, 512), nn.LeakyReLU(0.1))
+            # self.hidden2 = nn.Sequential(nn.Linear(512, 512), nn.LeakyReLU(0.1))
             self.out = nn.Sequential(nn.Linear(512, n_features), torch.nn.Sigmoid())
 
         else:
@@ -67,13 +68,13 @@ class GeneratorNet(torch.nn.Module):
                 nn.Linear(n_features + z_dimention, 256), nn.LeakyReLU(0.01)
             )
             self.hidden1 = nn.Sequential(nn.Linear(256, 512), nn.LeakyReLU(0.01))
-            #self.hidden2 = nn.Sequential(nn.Linear(512, 512))
+            # self.hidden2 = nn.Sequential(nn.Linear(512, 512))
             self.out = nn.Sequential(nn.Linear(512, n_features), torch.nn.Tanh())
 
     def forward(self, x):
         x = self.hidden0(x)
         x = self.hidden1(x)
-        #x = self.hidden2(x)
+        # x = self.hidden2(x)
         x = self.out(x)
         return x
 
@@ -325,12 +326,14 @@ def train(
         test_tpr.append(test_TPR)
         bar.next()
     bar.finish()
-    
-    
-def evaluate(z_dim, sigmoid, blackbox, num_examples= 10, include_data_labels = True):
+
+
+def evaluate(z_dim, sigmoid, blackbox, num_examples=10, include_data_labels=True):
     (mal, mal_lables), _ = load_data()
 
-    gen_weights_model_path = os.path.join('Best_loss_model/',os.listdir('Best_loss_model/')[0])
+    gen_weights_model_path = os.path.join(
+        "Best_loss_model/", os.listdir("Best_loss_model/")[0]
+    )
 
     gen_model = GeneratorNet(sigmoid=sigmoid, z_dimention=z_dim)
     gen_model.load_state_dict(torch.load(gen_weights_model_path))
@@ -338,37 +341,41 @@ def evaluate(z_dim, sigmoid, blackbox, num_examples= 10, include_data_labels = T
 
     mal_examples = mal[:num_examples]
     if sigmoid:
-            noise = np.random.uniform(0, 1, (num_examples, 20))
+        noise = np.random.uniform(0, 1, (num_examples, 20))
     else:
         noise = np.random.uniform(-1, 1, (num_examples, 20))
 
-    combined = np.concatenate([mal_examples, noise], axis=1)#*******
+    combined = np.concatenate([mal_examples, noise], axis=1)  # *******
     gen_examples = gen_model(torch.from_numpy(combined).float())
 
     if include_data_labels:
         y = mal_lables[:num_examples]
         if sigmoid:
             eval_score = blackbox.score(
-                np.ones(gen_examples.shape) * (np.asarray(gen_examples.detach()) > 0.5), y)
+                np.ones(gen_examples.shape) * (np.asarray(gen_examples.detach()) > 0.5),
+                y,
+            )
         else:
             eval_score = blackbox.score(
-                np.ones(gen_examples.shape) * (np.asarray(gen_examples.detach()) > 0), y)
+                np.ones(gen_examples.shape) * (np.asarray(gen_examples.detach()) > 0), y
+            )
     else:
         print("\nLabels: 1: Malware, 0: Benin")
 
         _class = blackbox.predict(gen_examples.detach())
         _class_proba = blackbox.predict_proba(gen_examples.detach())
-        print("Predicted: ",_class)
-        print("Probability: ",_class_proba)
+        print("Predicted: ", _class)
+        print("Probability: ", _class_proba)
         y_real = np.ones(num_examples)
-        print("Y_true: ",y_real)
+        print("Y_true: ", y_real)
 
         diff = _class - y_real
-        eval_score = (num_examples- np.count_nonzero(diff))/num_examples
+        eval_score = (num_examples - np.count_nonzero(diff)) / num_examples
 
-    print("Black_box_score: {}".format(eval_score),"\n")
+    print("Black_box_score: {}".format(eval_score), "\n")
     array = gen_examples.flatten()
     genscript.generate(array)
+
 
 def retrain(blackbox, generator, sigmoid):
     """
@@ -455,7 +462,7 @@ def arument_parser():
     parser.add_argument(
         "--blackbox",
         dest="blackbox",
-        help="Blackbox model:\n RF: Random Forest (default)\n LG: Logistic Regression\n DT: Decision Tree",
+        help="Blackbox model:\r\n RF: Random Forest \r\n LG: Logistic Regression \r\n DT: Decision Tree (default) \r\n SVM: Support Vector Machine",
     )
 
     args = parser.parse_args()
@@ -488,6 +495,8 @@ def main():
         )
     elif arg.blackbox == "LG":
         blackbox = linear_model.LogisticRegression()
+    elif arg.blackbox == "SVM":
+        blackbox = SVC()
     else:
         blackbox = tree.DecisionTreeRegressor()
 
@@ -539,7 +548,7 @@ def main():
             TEST_TPR[len(TEST_TPR) - 1], POST_TEST_TPR[len(POST_TEST_TPR) - 1]
         )
     )
-    #evaluate(z_dimention, sigmoid, blackbox, num_examples=1, include_data_labels=False)
+    # evaluate(z_dimention, sigmoid, blackbox, num_examples=1, include_data_labels=False)
 
     # plot data
     plt.plot(
@@ -573,4 +582,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
