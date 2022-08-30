@@ -1,0 +1,51 @@
+(base) gaunh0@gaunh0-box:~/Desktop/MalGAN$ python main.py 20 200 75 
+**********Discriminator structure************
+DiscriminatorNet(
+  (hidden0): Sequential(
+    (0): Linear(in_features=128, out_features=256, bias=True)
+    (1): LeakyReLU(negative_slope=0.01)
+  )
+  (hidden1): Sequential(
+    (0): Linear(in_features=256, out_features=512, bias=True)
+    (1): LeakyReLU(negative_slope=0.01)
+  )
+  (out): Sequential(
+    (0): Linear(in_features=512, out_features=1, bias=True)
+    (1): Sigmoid()
+  )
+)
+*************Generator structure*************
+GeneratorNet(
+  (hidden0): Sequential(
+    (0): Linear(in_features=148, out_features=256, bias=True)
+    (1): LeakyReLU(negative_slope=0.01)
+  )
+  (hidden1): Sequential(
+    (0): Linear(in_features=256, out_features=512, bias=True)
+    (1): LeakyReLU(negative_slope=0.01)
+  )
+  (out): Sequential(
+    (0): Linear(in_features=512, out_features=128, bias=True)
+    (1): Sigmoid()
+  )
+)
+Use Random Forest Blackbox
+
+---TPR before MalGAN is trainning.
+Train_TPR: 0.9945155393053017, Test_TPR: 0.9890510948905109
+
+Start training..
+Progress |################################| 200/200
+
+---TPR after the black-box detector is retrained(Before Retraining MalGAN).
+
+Train_TPR: 0.0, Test_TPR: 0.8832116788321168
+
+---TPR before MalGAN is trainning.
+Train_TPR: 0.9956140350877193, Test_TPR: 0.9868421052631579
+
+Start training..
+Progress |################################| 75/75
+
+TPR before: 1.0, TPR after: 0.8538011695906432
+
